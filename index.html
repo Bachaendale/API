@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eminem Album Info</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #333;
+            color: white;
+        }
+
+        .card-body {
+            color: rgb(5, 4, 4);
+        }
+
+        #detailedInfo {
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 767px) {
+            .col-md-6.position-fixed {
+                position: static;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row" id="appendData"></div>
+            </div>
+            <div class="col-md-6 position-fixed" style="top: 0; right: 0;">
+                <div id="detailedInfo" class="p-4"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        const showDetails = (album) => {
+            const detailedInfo = document.getElementById("detailedInfo");
+            detailedInfo.innerHTML = `<h5>${album.data.name}</h5>
+                                  <p>Artist: ${album.data.artists.items[0].profile.name}</p>
+                                  <p>Release Date: ${album.data.date.year}</p>
+                                  <img src="${album.data.coverArt.sources[0].url}" alt="${album.data.name} cover" style="max-width: 100%; max-height: 200px;">`;
+        };
+
+        const createCard = (album) => {
+            let wrapper = document.createElement("div");
+            wrapper.className = "card col-md-5 m-3";
+            wrapper.style.width = "18rem";
+
+            let cardBody = document.createElement("div");
+            cardBody.className = "card-body";
+
+            let title = document.createElement("h5");
+            title.className = "card-title";
+            title.textContent = album.data.name;
+
+            let artist = document.createElement("p");
+            artist.className = "card-text";
+            artist.textContent = `Artist: ${album.data.artists.items[0].profile.name}`;
+
+            let releaseYear = document.createElement("p");
+            releaseYear.className = "card-text";
+            releaseYear.textContent = `Release Year: ${album.data.date.year}`;
+
+            let coverImage = document.createElement("img");
+            coverImage.className = "card-img-top";
+            coverImage.src = album.data.coverArt.sources[0].url;
+            coverImage.alt = `${album.data.name} cover`;
+
+            let moreButton = document.createElement("button");
+            moreButton.className = "btn btn-primary";
+            moreButton.textContent = "More";
+            moreButton.addEventListener("click", () => {
+                showDetails(album);
+            });
+
+            cardBody.appendChild(title);
+            cardBody.appendChild(artist);
+            cardBody.appendChild(releaseYear);
+            cardBody.appendChild(moreButton);
+
+            wrapper.appendChild(coverImage);
+            wrapper.appendChild(cardBody);
+
+            document.getElementById("appendData").appendChild(wrapper);
+        };
+
+
+        const getData = async () => {
+            const url = 'https://spotify-web2.p.rapidapi.com/search/?q=eminem&type=albums&offset=0&limit=10&numberOfTopResults=5';
+            const options = {
+                method: 'GET',
+                headers: {
+                    'X-RapidAPI-Key': '0801c5d86cmshf758e1f9899f090p1fc753jsn1fc2bb41b999',
+                    'X-RapidAPI-Host': 'spotify-web2.p.rapidapi.com'
+                }
+            };
+
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                return data.albums.items;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                return [];
+            }
+        };
+
+        const displayData = async () => {
+            const albumData = await getData();
+            const appendDataElement = document.getElementById("appendData");
+
+            albumData.forEach(album => {
+                createCard(album);
+            });
+        };
+        displayData();
+    </script>
+</body>
+
+</html>
